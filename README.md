@@ -1,1 +1,2 @@
 Hi I am Arya K from GI and This Is My Arch Fast Install Script
+Here There Will Be a Quick Rundown of The Script, But If you want good instuctions, I will be posting a tutorial on our site https://geniusinfomedia.netlify.app.

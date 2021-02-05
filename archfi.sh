@@ -78,7 +78,7 @@ then
   $USERPASSWDLOL
   PASSUSER
   systemctl enable NetworkManager.service
-  EFI
+  CHROOT
   else
   echo "You are Using Legacy BIOS"
   umount -a
@@ -131,5 +131,6 @@ then
   $USERPASSWDLOL
   PASSUSER
   systemctl enable NetworkManager.service
-  EFI
+  CHROOT
 fi
+echo "Install Finished :) "

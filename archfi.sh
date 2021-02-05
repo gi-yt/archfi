@@ -20,7 +20,7 @@ FILE="/sys/firmware/efi/efivars"
 if [ -e "$FILE" ]
 then
   echo "You are Using EFI"
-umount -a
+  umount -a
   cat <<EFI | fdisk $IDISK
   g
   n
@@ -41,13 +41,95 @@ umount -a
   part_1=("${$IDISK}1")
   part_2=("${IDISK}2")
   part_3=("${IDISK}3")
+  headers=("${KERNEL}-headers") 
   mkfs.fat -F 32 $part_1
   mkfs.ext4 part_2
   mkfs.ext4 part_3
-
-
-  
-
+  mkdir /mnt
+  mount part_2 /mnt
+  mkdir /mnt/boot
+  mount part_1 /mnt/boot
+  mkdir /mnt/home
+  mount part_3 /mnt/home
+  pacstrap /mnt base base-devel $KERNEL linux-firmware $headers
+  genfstab -U /mnt >> /mnt/etc/fstab
+  cat <<CHROOT | arch-chroot /mnt
+  ln -sf /usr/share/zoneinfo/$TIMEZONEUSER /etc/localtime
+  timedatectl set-timezone $TIMEZONEUSER
+  echo "en_UTF-8 UTF-8" > /etc/locale.gen
+  locale-gen
+  touch /etc/locale.conf
+  echo "LANG=en_US.UTF-8" > /etc/locale.conf
+  export LANG=en_US.UTF-8
+  echo $HOSTNAMEOFNEWINSTALL > /etc/hostname
+   echo '127.0.0.1  localhost' | tee -a /etc/hosts
+   echo '::1        localhost' | tee -a /etc/hosts
+   echo '127.0.1.1  $HOSTNAMEOFNEWINSTALL' | tee -a /etc/hosts
+  cat <<PASS | passwd 
+  $ROOTPASSWD
+  $ROOTPASSWD
+  PASS
+  pacman -S grub efibootmgr os-prober networkmanager
+  grub-install --target=x86_64-efi --bootloader-id=GRUB --efi-directory=/boot
+  grub-mkconfig -o /boot/grub/grub.cfg
+  useradd -m -g users -G wheel $USERNAME
+  cat <<PASSUSER | passwd $USERNAME
+  $USERPASSWDLOL
+  $USERPASSWDLOL
+  PASSUSER
+  systemctl enable NetworkManager.service
+  EFI
   else
-  echo lo
+  echo "You are Using Legacy BIOS"
+  umount -a
+  cat <<BIOS | fdisk $IDISK
+  o
+  n
+
+
+  +30G
+  n
+
+
+
+  w
+  EFI
+  partprobe
+  part_1=("${$IDISK}1")
+  part_2=("${IDISK}2")
+  headers=("${KERNEL}-headers") 
+  mkfs.ext4 part_1
+  mkfs.ext4 part_2
+  mkdir /mnt
+  mount part_1 /mnt
+  mkdir /mnt/home
+  mount part_2 /mnt/home
+  pacstrap /mnt base base-devel $KERNEL linux-firmware $headers
+  genfstab -U /mnt >> /mnt/etc/fstab
+  cat <<CHROOT | arch-chroot /mnt
+  ln -sf /usr/share/zoneinfo/$TIMEZONEUSER /etc/localtime
+  timedatectl set-timezone $TIMEZONEUSER
+  echo "en_UTF-8 UTF-8" > /etc/locale.gen
+  locale-gen
+  touch /etc/locale.conf
+  echo "LANG=en_US.UTF-8" > /etc/locale.conf
+  export LANG=en_US.UTF-8
+  echo $HOSTNAMEOFNEWINSTALL > /etc/hostname
+   echo '127.0.0.1  localhost' | tee -a /etc/hosts
+   echo '::1        localhost' | tee -a /etc/hosts
+   echo '127.0.1.1  $HOSTNAMEOFNEWINSTALL' | tee -a /etc/hosts
+  cat <<PASS | passwd 
+  $ROOTPASSWD
+  $ROOTPASSWD
+  PASS
+  pacman -S grub efibootmgr os-prober networkmanager
+  grub-install $IDISK
+  grub-mkconfig -o /boot/grub/grub.cfg
+  useradd -m -g users -G wheel $USERNAME
+  cat <<PASSUSER | passwd $USERNAME
+  $USERPASSWDLOL
+  $USERPASSWDLOL
+  PASSUSER
+  systemctl enable NetworkManager.service
+  EFI
 fi

@@ -12,5 +12,8 @@ read -p "What Hostname Do You Want To use : " HOSTNAMEOFNEWINSTALL
 read -p "What Is Your ROOT PASSWORD. Note: Passwords entered during the install will be visible :) : " ROOTPASSWD
 read -p "what is The Username Of The User : " USERSNAME
 read -p "What is the password of the normal user : " USERSPASSWDLOL
-read -p "What Linux Kernel Do You Want to use (options are linux linux-zen linux-lts)" $KERNEL
+read -p "What Linux Kernel Do You Want to use (options are linux linux-zen linux-lts)" KERNEL
+read -p "What bootloader do you want to use (options are grub and systemd-boot)" $BOOTLOADER
+echo "DE, WM related stuff will be asked after the install finishes along with aur helper related stuff"
 echo "Thank You For Giving The Required Information $PNAME." 
+

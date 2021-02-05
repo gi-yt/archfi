@@ -21,12 +21,14 @@ if [ -e "$FILE" ]
 then
   echo "You are Using EFI"
   umount -a
-  cat <<EFI | fdisk $IDISK
+  cat <<EOF | fdisk $IDISK
   g
   n
 
 
   +512M
+  t
+  1
   n
 
 
@@ -35,8 +37,8 @@ then
 
 
 
-  w
-  EFI
+  q
+  EOF
   partprobe
   part_1=("${$IDISK}1")
   part_2=("${IDISK}2")

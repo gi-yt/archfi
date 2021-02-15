@@ -20,10 +20,10 @@ if [ -e "$FILE" ]
 then
   echo "You are Using EFI"
   echo "Make Sure You Dont Have $IDISK mounted anywhere"
-  parted  $IDISK --script mklabel gpt
+            parted -a optimal $disk_chk --script mklabel gpt
             parted $IDISK --script ESP fat32 1MiB 513MiB
-            parted $disk_chk --script mkpart primary ext4 513MiB 29123MiB
-            parted $disk_chk --script mkpart primary 29123MiB -1
+            parted $IDISK --script mkpart primary ext4 513MiB 29123MiB
+            parted $IDISK --script -- mkpart primary 29123MiB -1
   partprobe
   part_1=("${$IDISK}1")
   part_2=("${IDISK}2")
@@ -60,9 +60,9 @@ then
   arch-chroot /mnt systemctl enable NetworkManager.service
   else
   echo "You are Using Legacy BIOS"
-  parted $IDISK --script mklabel msdos
-  parted $disk_chk --script mkpart primary ext4 1MiB 29123MiB
-  parted $disk_chk --script mkpart primary 29123MiB -1
+  parted -a optimal $IDISK --script mklabel msdos
+  parted $IDISK --script mkpart primary ext4 1MiB 29123MiB
+  parted $IDISK --script -- mkpart primary 29123MiB -1
   partprobe
   part_1=("${$IDISK}1")
   part_2=("${IDISK}2")

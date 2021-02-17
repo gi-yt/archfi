@@ -93,5 +93,4 @@ then
   arch-chroot /mnt useradd -m -g users -G wheel $USERNAME
   echo -e "$USERPASSWDLOL\n$USERPASSWDLOL" | passwd USERNAME
   systemctl enable NetworkManager.service
-fi
 echo "Install Finished :) "

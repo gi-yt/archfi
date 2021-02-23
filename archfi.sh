@@ -13,6 +13,7 @@ read -p "What Is Your ROOT PASSWORD. Note: Passwords entered during the install 
 read -p "what is The Username Of The User : " USERSNAME
 read -p "What is the password of the normal user : " USERSPASSWDLOL
 read -p "What Linux Kernel Do You Want to use (options are linux linux-zen linux-lts)" KERNEL
+read -p "Do You Want NetworkManager (wifi, owned and developed by red hat), Connman(More Minimal) or dhcpcd(only wired)" NETWORKMANAGER
 echo "DE, WM related stuff will be asked after the install finishes along with aur helper related stuff"
 echo "Thank You For Giving The Required Information $PNAME." 
 FILE="/sys/firmware/efi/efivars"
@@ -20,10 +21,10 @@ if [ -e "$FILE" ]
 then
   echo "You are Using EFI"
   echo "Make Sure You Dont Have $IDISK mounted anywhere"
-            parted -a optimal $disk_chk --script mklabel gpt
-            parted $IDISK --script ESP fat32 1MiB 513MiB
-            parted $IDISK --script mkpart primary ext4 513MiB 29123MiB
-            parted $IDISK --script -- mkpart primary 29123MiB -1
+  parted -a optimal $IDISK --script mklabel gpt
+            parted $IDISK --script mkpart primary 1MiB 513MiB
+            parted $IDISK --script mkpart primary 513MiB 30000MiB
+            parted $IDISK --script -- mkpart primary 30000MiB -1
   partprobe
   part_1=("${$IDISK}1")
   part_2=("${IDISK}2")
@@ -60,9 +61,9 @@ then
   arch-chroot /mnt systemctl enable NetworkManager.service
   else
   echo "You are Using Legacy BIOS"
-  parted -a optimal $IDISK --script mklabel msdos
-  parted $IDISK --script mkpart primary ext4 1MiB 29123MiB
-  parted $IDISK --script -- mkpart primary 29123MiB -1
+  parted $IDISK --script mklabel msdos
+  parted $disk_chk --script mkpart primary ext4 1MiB 29123MiB
+  parted $disk_chk --script -- mkpart primary 29123MiB -1
   partprobe
   part_1=("${$IDISK}1")
   part_2=("${IDISK}2")
@@ -93,4 +94,6 @@ then
   arch-chroot /mnt useradd -m -g users -G wheel $USERNAME
   echo -e "$USERPASSWDLOL\n$USERPASSWDLOL" | passwd USERNAME
   systemctl enable NetworkManager.service
+fi
 echo "Install Finished :) "
+exit 0

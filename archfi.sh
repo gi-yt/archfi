@@ -13,7 +13,6 @@ read -p "What Is Your ROOT PASSWORD. Note: Passwords entered during the install 
 read -p "what is The Username Of The User : " USERSNAME
 read -p "What is the password of the normal user : " USERSPASSWDLOL
 read -p "What Linux Kernel Do You Want to use (options are linux linux-zen linux-lts)" KERNEL
-read -p "Do You Want NetworkManager (wifi, owned and developed by red hat), Connman(More Minimal) or dhcpcd(only wired)"
 echo "DE, WM related stuff will be asked after the install finishes along with aur helper related stuff"
 echo "Thank You For Giving The Required Information $PNAME." 
 FILE="/sys/firmware/efi/efivars"
@@ -43,20 +42,22 @@ then
   genfstab -U /mnt >> /mnt/etc/fstab
   arch-chroot /mnt ln -sf /usr/share/zoneinfo/$TIMEZONEUSER /etc/localtime
   arch-chroot /mnt timedatectl set-timezone $TIMEZONEUSER
-  arch-chroot /mnt echo "en_UTF-8 UTF-8" > /etc/locale.gen
+  arch-chroot /mnt hwclock --systohc
+  arch-chroot /mnt echo "en_UTF-8 UTF-8" >> /etc/locale.gen
   arch-chroot /mnt locale-gen
   arch-chroot /mnt touch /etc/locale.conf
-  arch-chroot /mnt echo "LANG=en_US.UTF-8" > /etc/locale.conf
+  arch-chroot /mnt echo "LANG=en_US.UTF-8" >> /etc/locale.conf
   arch-chroot /mnt export LANG=en_US.UTF-8
-  arch-chroot /mnt echo $HOSTNAMEOFNEWINSTALL > /etc/hostname
-  arch-chroot /mnt echo '127.0.0.1  localhost' | tee -a /etc/hosts
-  arch-chroot /mnt echo '::1        localhost' | tee -a /etc/hosts
-  arch-chroot /mnt echo '127.0.1.1  $HOSTNAMEOFNEWINSTALL' | tee -a /etc/hosts
+  arch-chroot /mnt echo $HOSTNAMEOFNEWINSTALL >> /etc/hostname
+  arch-chroot /mnt echo "127.0.0.1  localhost" | tee -a /etc/hosts
+  arch-chroot /mnt echo "::1        localhost" | tee -a /etc/hosts
+  arch-chroot /mnt echo "127.0.1.1  $HOSTNAMEOFNEWINSTALL" | tee -a /etc/hosts
   arch-chroot /mnt echo -e "$ROOTPASSWD\n$ROOTPASSWD" | passwd root
-  arch-chroot /mnt pacman -S grub efibootmgr os-prober networkmanager
+  arch-chroot /mnt pacman --noconfirm -S grub efibootmgr os-prober networkmanager
   arch-chroot /mnt grub-install --target=x86_64-efi --bootloader-id=GRUB --efi-directory=/boot
   arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
-  arch-chroot /mnt useradd -m -g users -G wheel $USERNAME
+  arch-chroot /mnt useradd -m $USERNAME
+  arch-chroot /mnt usermod -aG wheel ak
   arch-chroot /mnt echo -e "$USERPASSWDLOL\n$USERPASSWDLOL" | passwd $USERNAME
   arch-chroot /mnt systemctl enable NetworkManager.service
   else
@@ -78,20 +79,22 @@ then
   genfstab -U /mnt >> /mnt/etc/fstab
   arch-chroot /mnt ln -sf /usr/share/zoneinfo/$TIMEZONEUSER /etc/localtime
   arch-chroot /mnt timedatectl set-timezone $TIMEZONEUSER
-  arch-chroot /mnt echo "en_UTF-8 UTF-8" > /etc/locale.gen
+  arch-chroot /mnt echo "en_UTF-8 UTF-8" >> /etc/locale.gen
   arch-chroot /mnt locale-gen
   arch-chroot /mnt touch /etc/locale.conf
-  arch-chroot /mnt echo "LANG=en_US.UTF-8" > /etc/locale.conf
+  arch-chroot /mnt echo "LANG=en_US.UTF-8" >> /etc/locale.conf
   arch-chroot /mnt export LANG=en_US.UTF-8
-  arch-chroot /mnt echo $HOSTNAMEOFNEWINSTALL > /etc/hostname
-  arch-chroot /mnt echo '127.0.0.1  localhost' | tee -a /etc/hosts
-  arch-chroot /mnt echo '::1        localhost' | tee -a /etc/hosts
-  arch-chroot /mnt echo '127.0.1.1  $HOSTNAMEOFNEWINSTALL' | tee -a /etc/hosts
+  arch-chroot /mnt echo $HOSTNAMEOFNEWINSTALL >> /etc/hostname
+  arch-chroot /mnt echo "127.0.0.1  localhost" | tee -a /etc/hosts
+  arch-chroot /mnt echo "::1        localhost" | tee -a /etc/hosts
+  arch-chroot /mnt echo "127.0.1.1  $HOSTNAMEOFNEWINSTALL" | tee -a /etc/hosts
   arch-chroot /mnt echo -e "$ROOTPASSWD\n$ROOTPASSWD" | passwd root
   arch-chroot /mnt pacman -S grub os-prober networkmanager
   arch-chroot /mnt grub-install --target=i386-pc $IDISK
   arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
-  arch-chroot /mnt useradd -m -g users -G wheel $USERNAME
+  arch-chroot /mnt useradd -m $USERNAME
+  arch-chroot /mnt usermod -aG wheel $USERNAME
   echo -e "$USERPASSWDLOL\n$USERPASSWDLOL" | passwd USERNAME
   systemctl enable NetworkManager.service
+fi
 echo "Install Finished :) "
